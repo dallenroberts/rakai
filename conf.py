@@ -89,28 +89,33 @@ def set_config ( conf ):
  
     # HIV Science Params
     conf.parameters.Simulation_Type = "HIV_SIM"
-    conf.parameters.Base_Infectivity = 0.002327836
-    conf.parameters.CD4_Post_Infection_Weibull_Heterogeneity = 0
-    conf.parameters.CD4_Post_Infection_Weibull_Scale = 540.55
+    conf.parameters.Base_Infectivity = 0.00031382269992254885
+    conf.parameters.AIDS_Stage_Infectivity_Multiplier = 4.5
+    conf.parameters.CD4_At_Death_LogLogistic_Heterogeneity = 0.7
+    conf.parameters.CD4_At_Death_LogLogistic_Scale = 2.96
+    conf.parameters.CD4_Post_Infection_Weibull_Heterogeneity = 0.2756
+    conf.parameters.CD4_Post_Infection_Weibull_Scale = 560.43
     conf.parameters.Coital_Dilution_Factor_2_Partners = 0.75
     conf.parameters.Coital_Dilution_Factor_3_Partners = 0.6
     conf.parameters.Coital_Dilution_Factor_4_Plus_Partners = 0.45
+    conf.parameters.Condom_Transmission_Blocking_Probability = 0.8
     conf.parameters.Days_Between_Symptomatic_And_Death_Weibull_Heterogeneity = 0.5
     conf.parameters.Days_Between_Symptomatic_And_Death_Weibull_Scale = 618.341625
     conf.parameters.Enable_Maternal_Infection_Transmission = 1
     conf.parameters.HIV_Age_Max_for_Adult_Age_Dependent_Survival = 50
     conf.parameters.Male_To_Female_Relative_Infectivity_Ages = [ 0, 15, 25 ]
-    conf.parameters.Male_To_Female_Relative_Infectivity_Multipliers = [ 4.684, 4.684, 2.962 ]
+    conf.parameters.Male_To_Female_Relative_Infectivity_Multipliers = [2.9976868182763963, 2.9976868182763963, 2.936393464131044 ]
     conf.parameters.Maternal_Infection_Transmission_Probability = 0.3
     conf.parameters.Maternal_Transmission_ART_Multiplier = 0.03334
     conf.parameters.Min_Days_Between_Adding_Relationships = 0
+    conf.parameters.Number_Substrains = 1
     conf.parameters.PFA_Burnin_Duration_In_Days = 5475
     conf.parameters.STI_Coinfection_Acquisition_Multiplier = 5.5
     conf.parameters.STI_Coinfection_Transmission_Multiplier = 5.5
-    conf.parameters.Sexual_Debut_Age_Female_Weibull_Heterogeneity = 0.299281948
-    conf.parameters.Sexual_Debut_Age_Female_Weibull_Scale = 16.34494123
-    conf.parameters.Sexual_Debut_Age_Male_Weibull_Heterogeneity = 0.053712118
-    conf.parameters.Sexual_Debut_Age_Male_Weibull_Scale = 17.72188303
+    conf.parameters.Sexual_Debut_Age_Female_Weibull_Heterogeneity = 0.22002507694706103
+    conf.parameters.Sexual_Debut_Age_Female_Weibull_Scale = 15.092122890359025
+    conf.parameters.Sexual_Debut_Age_Male_Weibull_Heterogeneity = 0.1268087803455056
+    conf.parameters.Sexual_Debut_Age_Male_Weibull_Scale = 15.582384534190258
 
     # Simulation Setup
     conf.parameters.Base_Year = 1960.5

@@ -43,8 +43,9 @@ def print_params():
     print("nSims: ", params.nSims)
 
 def set_param_fn( config ):
+    config.parameters.Simulation_Timestep = 1 ## Default, but most EMOD HIV models use 30.4166666666667
     config.parameters.Base_Population_Scale_Factor = 0.05
-    config.parameters.Simulation_Duration = 10*365.0 # maybe this should be a team-wide default?
+    config.parameters.Simulation_Duration = 10*365.0 # maybe this should be a team-wide default? Rakai uses 20700
     config.parameters.Enable_Demographics_Reporting = 0  # just because I don't like our default for this
 
     # config hacks until schema fixes arrive
