@@ -1,0 +1,5 @@
+/*.json
+*.log
+stash/
+__pycache__/
+COMPS_ID
