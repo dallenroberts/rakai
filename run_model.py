@@ -63,21 +63,37 @@ def set_param_fn( config ):
     return config
 
 
+def create_seed_event( start_day=365, coverage=0.075):
+    import emod_api.campaign as camp
+    import emodpy_hiv.interventions.outbreak as ob
+    import emod_api.interventions.common as common
+    import emod_api.interventions.utils as utils
+    from emod_api import schema_to_class as s2c
+    from emodpy_hiv.interventions import utils as hiv_utils
+    camp.set_schema( manifest.schema_file )
+    outbreak = s2c.get_class_with_defaults( "OutbreakIndividual", camp.schema_path )
+    outbreak['Intervention_Name'] = "Seeding"
+    event = common.ScheduledCampaignEvent( camp, start_day, utils.do_nodes( camp.schema_path, [] ), Demographic_Coverage=coverage, Intervention_List=[ outbreak ] )
+    prs = utils._convert_prs( "Risk:MEDIUM" )
+    if len(prs)>0 and type(prs[0]) is dict:
+        event.Event_Coordinator_Config.Property_Restrictions_Within_Node = prs
+        event.Event_Coordinator_Config.pop( "Property_Restrictions" )
+    else:
+        event.Event_Coordinator_Config.Property_Restrictions = prs
+        event.Event_Coordinator_Config.pop( "Property_Restrictions_Within_Node" )
+    hiv_utils.declutter( event )
+    return event
+
 def build_camp():
     """
     Build a campaign input file for the DTK using emod_api.
     Right now this function creates the file and returns the filename. If calling code just needs an asset that's fine.
     """
     import emod_api.campaign as camp
-    import emodpy_hiv.interventions.outbreak as ob 
-
-    print(f"Telling emod-api to use {manifest.schema_file} as schema.")
-    camp.schema_path = manifest.schema_file
-    
-    # importation pressure
-    event = ob.new_intervention( timestep=365, camp=camp, coverage=0.01 )
-    camp.add( event, first=True )
+    event = create_seed_event()
+    camp.add( event )
     return camp
+
 
 def build_demog():
     """
