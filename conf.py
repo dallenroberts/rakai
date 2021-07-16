@@ -108,7 +108,6 @@ def set_config ( conf ):
     conf.parameters.Maternal_Infection_Transmission_Probability = 0.3
     conf.parameters.Maternal_Transmission_ART_Multiplier = 0.03334
     conf.parameters.Min_Days_Between_Adding_Relationships = 0
-    conf.parameters.Number_Substrains = 1
     conf.parameters.PFA_Burnin_Duration_In_Days = 5475
     conf.parameters.STI_Coinfection_Acquisition_Multiplier = 5.5
     conf.parameters.STI_Coinfection_Transmission_Multiplier = 5.5
@@ -116,6 +115,13 @@ def set_config ( conf ):
     conf.parameters.Sexual_Debut_Age_Female_Weibull_Scale = 15.092122890359025
     conf.parameters.Sexual_Debut_Age_Male_Weibull_Heterogeneity = 0.1268087803455056
     conf.parameters.Sexual_Debut_Age_Male_Weibull_Scale = 15.582384534190258
+
+    ## We will remove this parameter when demographics are set programmatically
+    conf.parameters.Age_Initialization_Distribution_Type = "DISTRIBUTION_COMPLEX"
+    conf.parameters.Enable_Natural_Mortality = 1
+    conf.parameters.Death_Rate_Dependence = "NONDISEASE_MORTALITY_BY_YEAR_AND_AGE_FOR_EACH_GENDER"
+    conf.parameters.Mortality_Time_Course = "DAILY_MORTALITY"
+    conf.parameters.x_Other_Mortality = 1
 
     # Simulation Setup
     conf.parameters.Base_Year = 1960.5
