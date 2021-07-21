@@ -16,7 +16,7 @@ from emodpy.emod_task import EMODTask
 from emodpy.utils import EradicationBambooBuilds
 from emodpy.bamboo import get_model_files
 
-import params
+import control_params
 import manifest
 
 # ****************************************************************
@@ -39,14 +39,22 @@ def print_params():
     """
     # Display exp_name and nSims
     # TBD: Just loop through them
-    print("exp_name: ", params.exp_name)
-    print("nSims: ", params.nSims)
+    print("exp_name: ", control_params.exp_name)
+    print("nSims: ", control_params.nSims)
 
 def set_param_fn( config ):
-    config.parameters.Simulation_Timestep = 1 ## Default, but most EMOD HIV models use 30.4166666666667
-    config.parameters.Base_Population_Scale_Factor = 0.05
-    config.parameters.Simulation_Duration = 10*365.0 # maybe this should be a team-wide default? Rakai uses 20700
-    config.parameters.Enable_Demographics_Reporting = 0  # just because I don't like our default for this
+
+    # Simulation Setup
+    config.parameters.Base_Population_Scale_Factor = control_params.Base_Population_Scale_Factor
+    config.parameters.Base_Year = control_params.Base_Year
+    config.parameters.Enable_Demographics_Reporting = control_params.Enable_Demographics_Reporting
+    config.parameters.Individual_Sampling_Type = control_params.Individual_Sampling_Type
+    config.parameters.Simulation_Timestep = control_params.Simulation_Timestep 
+    config.parameters.Load_Balance_Filename = control_params.Load_Balance_Filename
+    config.parameters.Node_Grid_Size = control_params.Node_Grid_Size
+    config.parameters.Random_Number_Generator_Policy = control_params.Random_Number_Generator_Policy
+    config.parameters.Random_Number_Generator_Type = control_params.Random_Number_Generator_Type
+    config.parameters.Simulation_Duration = control_params.Simulation_Duration 
 
     # config hacks until schema fixes arrive
     config.parameters.pop( "Serialized_Population_Filenames" )
@@ -62,27 +70,8 @@ def set_param_fn( config ):
 
     return config
 
-
-def create_seed_event( start_day=365, coverage=0.075):
-    import emod_api.campaign as camp
-    import emodpy_hiv.interventions.outbreak as ob
-    import emod_api.interventions.common as common
-    import emod_api.interventions.utils as utils
-    from emod_api import schema_to_class as s2c
-    from emodpy_hiv.interventions import utils as hiv_utils
-    camp.set_schema( manifest.schema_file )
-    outbreak = s2c.get_class_with_defaults( "OutbreakIndividual", camp.schema_path )
-    outbreak['Intervention_Name'] = "Seeding"
-    event = common.ScheduledCampaignEvent( camp, start_day, utils.do_nodes( camp.schema_path, [] ), Demographic_Coverage=coverage, Intervention_List=[ outbreak ] )
-    prs = utils._convert_prs( "Risk:MEDIUM" )
-    if len(prs)>0 and type(prs[0]) is dict:
-        event.Event_Coordinator_Config.Property_Restrictions_Within_Node = prs
-        event.Event_Coordinator_Config.pop( "Property_Restrictions" )
-    else:
-        event.Event_Coordinator_Config.Property_Restrictions = prs
-        event.Event_Coordinator_Config.pop( "Property_Restrictions_Within_Node" )
-    hiv_utils.declutter( event )
-    return event
+def timestep_from_year( year ):
+    return (year-control_params.Base_Year)*365
 
 def build_camp():
     """
@@ -90,7 +79,9 @@ def build_camp():
     Right now this function creates the file and returns the filename. If calling code just needs an asset that's fine.
     """
     import emod_api.campaign as camp
-    event = create_seed_event()
+    camp.set_schema( manifest.schema_file )
+    import emodpy_hiv.interventions.outbreak as ob
+    event = ob.seed_infections(camp, start_day = timestep_from_year(control_params.Base_Year + 1), coverage = 0.075, target_properties = "Risk:MEDIUM")
     camp.add( event )
     return camp
 
@@ -138,10 +129,10 @@ def general_sim( erad_path, ep4_scripts ):
 
     # Create simulation sweep with builder
     builder = SimulationBuilder()
-    builder.add_sweep_definition( update_sim_random_seed, range(params.nSims) )
+    builder.add_sweep_definition( update_sim_random_seed, range(control_params.nSims) )
 
     # create experiment from builder
-    experiment  = Experiment.from_builder(builder, task, name=params.exp_name) 
+    experiment  = Experiment.from_builder(builder, task, name=control_params.exp_name) 
 
     # The last step is to call run() on the ExperimentManager to run the simulations.
     experiment.run(wait_until_done=True, platform=platform)

@@ -123,13 +123,5 @@ def set_config ( conf ):
     conf.parameters.Mortality_Time_Course = "DAILY_MORTALITY"
     conf.parameters.x_Other_Mortality = 1
 
-    # Simulation Setup
-    conf.parameters.Base_Year = 1960.5
-    conf.parameters.Individual_Sampling_Type = "FIXED_SAMPLING"
-    conf.parameters.Load_Balance_Filename = ""
-    conf.parameters.Node_Grid_Size = 0.009 
-    conf.parameters.Random_Number_Generator_Policy = "ONE_PER_NODE"
-    conf.parameters.Random_Number_Generator_Type = "USE_AES_COUNTER"
-
     config_non_schema_params( conf )
     config_reports( conf )
