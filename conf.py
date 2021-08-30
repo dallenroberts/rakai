@@ -10,10 +10,10 @@ def config_reports( conf ):
     conf.parameters.Report_Event_Recorder_Events = [
       "NewInfectionEvent",
       "HIVSymptomatic",
-      # "StartTreatment",
-      "StartedART",
-      # "GetTested",
-      # "HIVPositiveTest"
+      "STIDebut",
+      "CSW_Uptake",
+      "CSW_Dropout",
+      "CaughtNonHIVSTI"
     ]
     conf.parameters.Report_HIV_ART = 1
     #conf.parameters.Report_HIV_ART_Start_Year = 2004
@@ -61,9 +61,9 @@ def config_reports( conf ):
     conf.parameters.Report_Transmission = 1
     conf.parameters.Report_HIV_Infection_Start_Year = 1980
     conf.parameters.Report_HIV_Infection_Stop_Year = 2050
+    conf.parameters.Enable_Property_Output = 1
    
 def config_non_schema_params( conf ):
-    conf.parameters["Disable_IP_Whitelist"] = 1
     conf.parameters["Enable_Continuous_Log_Flushing"] = 0
     conf.parameters["logLevel_default"] = "WARNING"
     #conf.parameters.alpha__logLevel_Memory = "WARNING"
