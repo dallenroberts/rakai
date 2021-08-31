@@ -122,8 +122,7 @@ def add_pos_status_known_tracker( camp ):
     which makes them ART-eligible. Drive this from data instead of creating a complex cascade that
     uses actually testing, etc. These coverages can vary by age group, sex, and simulation date.
     """
-    tvmap = { "1962": 0.5, 1963: 0.6, 1964: 0.7 } # just some simple test version
-    # tvmap = { "1962": 0.99, 1963: 0.99, 1964: 0.99 } # almost everyone
+    tvmap = { 1990: 0.1, 2000: 0.2, 2010: 0.6, 2020: 0.8 }
     _distribute_psk_tracker_by_age_and_sex( camp, ck.PSK_Male_Age_Lower_Bound, ck.PSK_Male_Age_Upper_Bound, "Male", tvmap )
     _distribute_psk_tracker_by_age_and_sex( camp, ck.PSK_Female_Age_Lower_Bound, ck.PSK_Female_Age_Upper_Bound, "Female", tvmap )
 
@@ -135,15 +134,21 @@ def _distribute_art_by_ref_counter_by_age_and_sex( camp, art_coverage, min_age, 
     """
     import emodpy_hiv.interventions.reftracker as reftracker
     import emodpy_hiv.interventions.art as art
+    import emodpy_hiv.interventions.artdropout as art_dropout
+
     new_art = art.new_intervention( camp )
-    delayed_dropout_iv = hiv_utils.broadcast_event_delayed( camp, "ARTDropout", delay={ "Delay_Period": ck.ART_Duration } ) # make this duration a bit more sophisticated
+    started_art_signal = hiv_utils.broadcast_event_immediate(camp, "Started_ART")
+    delayed_dropout_iv = hiv_utils.broadcast_event_delayed( camp, "ART_Dropout", delay={ "Delay_Period": ck.ART_Duration } ) # make this duration a bit more sophisticated
     delayed_dropout_iv["Intervention_Name"] = "ART"
-    mid = comm.MultiInterventionDistributor( camp, [ new_art, delayed_dropout_iv ] )
+    mid = comm.MultiInterventionDistributor( camp, [ new_art, delayed_dropout_iv, started_art_signal ] )
     mid["Intervention_Name"] = "ART"
     # Old way of doing ART is ARTBasic + Delay->ARTDropout
     event = reftracker.DistributeIVByRefTrack( camp, Start_Day=1, Intervention=mid, TVMap=tvmap, Property_Restrictions=ART_eligible_tag, Target_Gender=sex, Target_Age_Min=min_age, Target_Age_Max=max_age )
     camp.add( event )
 
+    ## ART Dropout
+    dropout = art_dropout.new_intervention( camp )
+    add_triggered_event( camp, in_trigger="ART_Dropout", out_iv=dropout, event_name="ART Dropout" )
 
 
 def distribute_art_by_ref_counter( camp, art_coverage ):
@@ -151,8 +156,7 @@ def distribute_art_by_ref_counter( camp, art_coverage ):
     For the ART:
     3) Give out a ref tracker that filters on the target IP InterventionStatus:ARTEligible and distributes ART.
     """
-    #tvmap = { "1970": art_coverage/10, 1976: art_coverage/2, 1983: art_coverage }
-    tvmap = { "1972": art_coverage/10, 1978: art_coverage/2, 1985: art_coverage }
+    tvmap = { 2004: art_coverage/10, 2010: art_coverage/2, 2020: art_coverage }
     _distribute_art_by_ref_counter_by_age_and_sex( camp, art_coverage, ck.ART_Male_Age_Lower_Bound, ck.ART_Male_Age_Upper_Bound, "Male", tvmap )
     _distribute_art_by_ref_counter_by_age_and_sex( camp, art_coverage, ck.ART_Female_Age_Lower_Bound, ck.ART_Female_Age_Upper_Bound, "Female", tvmap )
     
@@ -219,8 +223,8 @@ def build_camp( art_coverage = 1.0 ):
     import emod_api.campaign as camp
     camp.set_schema( manifest.schema_file )
 
-    # Crudely seed the infection
-    event = ob.seed_infections( camp, start_day=timestep_from_year( 1961.5 ) )
+    # Seed infections
+    event = ob.seed_infections(camp, start_day = timestep_from_year(control_params.Base_Year + 1), coverage = 0.075, target_properties = "Risk:MEDIUM")
     camp.add( event )
 
     add_sti_coinfection_complex(camp, ck.STI_Low_Risk_Coverage, ck.STI_Med_Risk_Coverage, ck.STI_High_Risk_Coverage)
@@ -250,9 +254,14 @@ def build_demog():
     # demog = Demographics.from_template_node( lat=0, lon=0, pop=10000, name=1, forced_id=1 )
 
     demog.AddIndividualPropertyAndHINT( Property="Accessibility", Values=["Easy","Hard"], InitialDistribution=[0.0, 1.0] )
-    demog.AddIndividualPropertyAndHINT( Property="Risk", Values=["LOW","MEDIUM","HIGH"], InitialDistribution=[0.99, 0, 0.01] )
+    demog.AddIndividualPropertyAndHINT( Property="Risk", Values=["LOW","MEDIUM","HIGH"], InitialDistribution=[ 0.6637418389, 0.3362581611, 0.0] )
     demog.AddIndividualPropertyAndHINT( Property="TestingStatus", Values=["INELIGIBLE","ELIGIBLE"], InitialDistribution=[1.0, 0 ] )
+
+    ## Assortivity by risk
     demog.apply_assortivity( "COMMERCIAL", [ [1,1,1],[1,1,1],[1,1,1] ] )
+    demog.apply_assortivity( "INFORMAL", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
+    demog.apply_assortivity( "MARITAL", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
+    demog.apply_assortivity( "TRANSITORY", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
 
     return demog
 
@@ -272,14 +281,14 @@ def general_sim():
 
     # Create a platform
     # Show how to dynamically set priority and node_group
-    platform = Platform("Calculon", node_group="idm_48cores", priority="Normal") 
+    platform = Platform("Calculon", node_group="idm_48cores", priority="Highest") 
     # pl = RequirementsToAssetCollection( platform, requirements_path=manifest.requirements ) 
 
     task = EMODTask.from_default2(config_path="config.json", eradication_path=manifest.eradication_path, campaign_builder=build_camp, demog_builder=build_demog, schema_path=manifest.schema_file, param_custom_cb=set_param_fn, ep4_custom_cb=None)
 
     #task.common_assets.add_asset( demog_path )
 
-    print("Adding asset dir...")
+    # print("Adding asset dir...")
     # task.common_assets.add_directory(assets_directory=manifest.assets_input_dir)
 
     task.set_sif( "dtk_centos.id" )

@@ -13,14 +13,16 @@ def config_reports( conf ):
       "STIDebut",
       "CSW_Uptake",
       "CSW_Dropout",
-      "CaughtNonHIVSTI"
+      "CaughtNonHIVSTI",
+      "Started_ART",
+      "ART_Dropout"
     ]
     conf.parameters.Report_HIV_ART = 1
     #conf.parameters.Report_HIV_ART_Start_Year = 2004
     #conf.parameters.Report_HIV_ART_Stop_Year = 10000
     conf.parameters.Report_HIV_ByAgeAndGender = 1
-    conf.parameters.Report_HIV_ByAgeAndGender_Add_Relationships = 1
-    conf.parameters.Report_HIV_ByAgeAndGender_Add_Transmitters = 1
+    conf.parameters.Report_HIV_ByAgeAndGender_Add_Relationships = 0
+    conf.parameters.Report_HIV_ByAgeAndGender_Add_Transmitters = 0
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Age_Bins_Data = [
       0,
       5,
@@ -40,24 +42,22 @@ def config_reports( conf ):
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Circumcision_Data = 1
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Gender_Data = 1
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_HIV_Data = 1
-    #conf.parameters.Report_HIV_ByAgeAndGender_Collect_IP_Data = [ "ARTstate" ]
+    conf.parameters.Report_HIV_ByAgeAndGender_Collect_IP_Data = []
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Intervention_Data = []
-    conf.parameters.Report_HIV_ByAgeAndGender_Collect_On_Art_Data = 1
+    conf.parameters.Report_HIV_ByAgeAndGender_Collect_On_Art_Data = 0
     rhbaagecl_events_for_later = [
       "Program_VMMC",
       "Non_Program_MMC"
     ]
-    conf.parameters.Report_HIV_ByAgeAndGender_Event_Counter_List = [ "NewInfectionEvent" ]
-    conf.parameters.Report_HIV_ByAgeAndGender_Has_Intervention_With_Name = "Traditional_MC"
+    conf.parameters.Report_HIV_ByAgeAndGender_Event_Counter_List = []
+    conf.parameters.Report_HIV_ByAgeAndGender_Has_Intervention_With_Name = ""
     conf.parameters.Report_HIV_ByAgeAndGender_Start_Year = 1980
-    conf.parameters.Report_HIV_ByAgeAndGender_Stop_Year = 2199
-    conf.parameters.Report_HIV_Event_Channels_List = [
-      "NewInfectionEvent"
-    ]
-    conf.parameters.Report_HIV_Infection = 1
-    conf.parameters.Report_HIV_Mortality = 1
+    conf.parameters.Report_HIV_ByAgeAndGender_Stop_Year = 2020
+    conf.parameters.Report_HIV_Event_Channels_List = []
+    conf.parameters.Report_HIV_Infection = 0
+    conf.parameters.Report_HIV_Mortality = 0
     conf.parameters.Report_HIV_Period = 365
-    conf.parameters.Report_Relationship_Start = 1
+    conf.parameters.Report_Relationship_Start = 0
     conf.parameters.Report_Transmission = 1
     conf.parameters.Report_HIV_Infection_Start_Year = 1980
     conf.parameters.Report_HIV_Infection_Stop_Year = 2050
