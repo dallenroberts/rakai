@@ -15,7 +15,8 @@ def config_reports( conf ):
       "CSW_Dropout",
       "CaughtNonHIVSTI",
       "Started_ART",
-      "ART_Dropout"
+      "ART_Dropout",
+      "Circumcised"
     ]
     conf.parameters.Report_HIV_ART = 1
     #conf.parameters.Report_HIV_ART_Start_Year = 2004
@@ -42,7 +43,7 @@ def config_reports( conf ):
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Circumcision_Data = 1
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Gender_Data = 1
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_HIV_Data = 1
-    conf.parameters.Report_HIV_ByAgeAndGender_Collect_IP_Data = []
+    conf.parameters.Report_HIV_ByAgeAndGender_Collect_IP_Data = ["Accessibility", "TestingStatus"]
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Intervention_Data = []
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_On_Art_Data = 0
     rhbaagecl_events_for_later = [
@@ -52,12 +53,12 @@ def config_reports( conf ):
     conf.parameters.Report_HIV_ByAgeAndGender_Event_Counter_List = []
     conf.parameters.Report_HIV_ByAgeAndGender_Has_Intervention_With_Name = ""
     conf.parameters.Report_HIV_ByAgeAndGender_Start_Year = 1980
-    conf.parameters.Report_HIV_ByAgeAndGender_Stop_Year = 2020
+    conf.parameters.Report_HIV_ByAgeAndGender_Stop_Year = 2100
     conf.parameters.Report_HIV_Event_Channels_List = []
     conf.parameters.Report_HIV_Infection = 0
     conf.parameters.Report_HIV_Mortality = 0
     conf.parameters.Report_HIV_Period = 365
-    conf.parameters.Report_Relationship_Start = 0
+    conf.parameters.Report_Relationship_Start = 1
     conf.parameters.Report_Transmission = 1
     conf.parameters.Report_HIV_Infection_Start_Year = 1980
     conf.parameters.Report_HIV_Infection_Stop_Year = 2050
@@ -66,6 +67,7 @@ def config_reports( conf ):
 def config_non_schema_params( conf ):
     conf.parameters["Enable_Continuous_Log_Flushing"] = 0
     conf.parameters["logLevel_default"] = "WARNING"
+    conf.parameters["Disable_IP_Whitelist"] = 1
     #conf.parameters.alpha__logLevel_Memory = "WARNING"
     #conf.parameters.logLevel_InfectionHIV = "ERROR"
     #conf.parameters.logLevel_Instrumentation = "ERROR"

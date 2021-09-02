@@ -160,6 +160,28 @@ def distribute_art_by_ref_counter( camp, art_coverage ):
     _distribute_art_by_ref_counter_by_age_and_sex( camp, art_coverage, ck.ART_Male_Age_Lower_Bound, ck.ART_Male_Age_Upper_Bound, "Male", tvmap )
     _distribute_art_by_ref_counter_by_age_and_sex( camp, art_coverage, ck.ART_Female_Age_Lower_Bound, ck.ART_Female_Age_Upper_Bound, "Female", tvmap )
     
+def _distribute_circumcision_by_ref_counter_by_age( camp, art_coverage, min_age, max_age, tvmap ):
+    """
+    Internal utility function to do the 'dirty work' to support distribute_circumcision_by_ref_counter for a given
+    min_age and max_age.
+    """
+    import emodpy_hiv.interventions.reftracker as reftracker
+    import emodpy_hiv.interventions.malecirc as circ
+
+    new_circ = circ.new_intervention( camp )
+    circ_signal = hiv_utils.broadcast_event_immediate(camp, "Circumcised")
+    mid = comm.MultiInterventionDistributor( camp, [ new_circ, circ_signal ] )
+    mid["Intervention_Name"] = "MaleCircumcision"
+    event = reftracker.DistributeIVByRefTrack( camp, Start_Day=1, Intervention=mid, TVMap=tvmap, Target_Gender="Male", Target_Age_Min=min_age, Target_Age_Max=max_age )
+    camp.add( event )
+
+def distribute_circumcision_by_ref_counter( camp, circ_coverage ):
+    """
+    3) Give out a ref tracker that distributes circumcision
+    """
+    tvmap = { 2004: circ_coverage/10, 2010: circ_coverage/2, 2020: circ_coverage }
+    _distribute_circumcision_by_ref_counter_by_age( camp, circ_coverage, min_age = 0, max_age = 100, tvmap = tvmap )
+
 def update_sim_bic(simulation, value):
     """
         Update the value of a (scientific) configuration parameter, in this case Base_Infectivity_Constant 
@@ -212,7 +234,7 @@ def set_param_fn( config ):
 def timestep_from_year( year ):
     return (year-control_params.Base_Year)*365
 
-def build_camp( art_coverage = 1.0 ):
+def build_camp( art_coverage = 0 ):
     """
         Build a campaign input file for the DTK using emod_api type functions or helpers from this module. 
         Note that 'camp' is short for 'campaign'.
@@ -225,12 +247,20 @@ def build_camp( art_coverage = 1.0 ):
 
     # Seed infections
     event = ob.seed_infections(camp, start_day = timestep_from_year(control_params.Base_Year + 1), coverage = 0.075, target_properties = "Risk:MEDIUM")
+    # event = ob.new_intervention(camp = camp, timestep = timestep_from_year(2004), coverage = 0.5)
     camp.add( event )
+
+    # event = ob.new_intervention(camp = camp, timestep = timestep_from_year(2010), coverage = 0.5)
+    # camp.add( event )
+
+    # event = ob.new_intervention(camp = camp, timestep = timestep_from_year(2020), coverage = 0.5)
+    # camp.add( event )
 
     add_sti_coinfection_complex(camp, ck.STI_Low_Risk_Coverage, ck.STI_Med_Risk_Coverage, ck.STI_High_Risk_Coverage)
     add_csw( camp )
     add_pos_status_known_tracker( camp )
     distribute_art_by_ref_counter( camp, art_coverage  )
+    distribute_circumcision_by_ref_counter( camp, circ_coverage = 0.2  )
     return camp
 
 
@@ -243,25 +273,25 @@ def build_demog():
 
     """
     import emodpy_hiv.demographics.HIVDemographics as Demographics # OK to call into emod-api
-    import emod_api.demographics.Demographics as demo
-    import emod_api.demographics.DemographicsTemplates as DT
+    # import emod_api.demographics.Demographics as demo
+    # import emod_api.demographics.DemographicsTemplates as DT
 
-    demog = Demographics.from_template_node( lat=0, lon=0, pop=100000, name=1, forced_id=1 )
-    demog.SetEquilibriumAgeDistFromBirthAndMortRates()
-    demog.fertility( "Malawi_Fertility_Historical.csv" )
-    demog.mortality( "Malawi_male_mortality.csv", "Malawi_female_mortality.csv" )
+    # demog = Demographics.from_template_node( lat=0, lon=0, pop=100000, name=1, forced_id=1 )
+    # demog.SetEquilibriumAgeDistFromBirthAndMortRates()
+    # demog.fertility( "Malawi_Fertility_Historical.csv" )
+    # demog.mortality( "Malawi_male_mortality.csv", "Malawi_female_mortality.csv" )
 
-    # demog = Demographics.from_template_node( lat=0, lon=0, pop=10000, name=1, forced_id=1 )
+    demog = Demographics.from_template_node( lat=0, lon=0, pop=10000, name=1, forced_id=1 )
 
-    demog.AddIndividualPropertyAndHINT( Property="Accessibility", Values=["Easy","Hard"], InitialDistribution=[0.0, 1.0] )
-    demog.AddIndividualPropertyAndHINT( Property="Risk", Values=["LOW","MEDIUM","HIGH"], InitialDistribution=[ 0.6637418389, 0.3362581611, 0.0] )
-    demog.AddIndividualPropertyAndHINT( Property="TestingStatus", Values=["INELIGIBLE","ELIGIBLE"], InitialDistribution=[1.0, 0 ] )
+    # demog.AddIndividualPropertyAndHINT( Property="Accessibility", Values=["Easy","Hard"], InitialDistribution=[0.0, 1.0] )
+    # demog.AddIndividualPropertyAndHINT( Property="Risk", Values=["LOW","MEDIUM","HIGH"], InitialDistribution=[ 0.6637418389, 0.3362581611, 0.0] )
+    # demog.AddIndividualPropertyAndHINT( Property="TestingStatus", Values=["INELIGIBLE","ELIGIBLE"], InitialDistribution=[1.0, 0 ] )
 
     ## Assortivity by risk
-    demog.apply_assortivity( "COMMERCIAL", [ [1,1,1],[1,1,1],[1,1,1] ] )
-    demog.apply_assortivity( "INFORMAL", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
-    demog.apply_assortivity( "MARITAL", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
-    demog.apply_assortivity( "TRANSITORY", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
+    # demog.apply_assortivity( "COMMERCIAL", [ [1,1,1],[1,1,1],[1,1,1] ] )
+    # demog.apply_assortivity( "INFORMAL", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
+    # demog.apply_assortivity( "MARITAL", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
+    # demog.apply_assortivity( "TRANSITORY", [ [0.6097767084, 0.3902232916, 0],[0.3902232916,0.6097767084,0.6097767084],[0,0.6097767084,0.3902232916] ] )
 
     return demog
 
@@ -272,7 +302,7 @@ def art_coverage_test_sweep( simulation, sweep_param ):
     simulation.task.create_campaign_from_callback( build_campaign_partial )
     return {"ART_Target_Coverage": art_coverage }
 
-def general_sim():
+def general_sim(ep4_scripts):
     """
     This function is designed to be a parameterized version of the sequence of things we do 
     every time we run an emod experiment. 
@@ -284,27 +314,28 @@ def general_sim():
     platform = Platform("Calculon", node_group="idm_48cores", priority="Highest") 
     # pl = RequirementsToAssetCollection( platform, requirements_path=manifest.requirements ) 
 
-    task = EMODTask.from_default2(config_path="config.json", eradication_path=manifest.eradication_path, campaign_builder=build_camp, demog_builder=build_demog, schema_path=manifest.schema_file, param_custom_cb=set_param_fn, ep4_custom_cb=None)
+    task = EMODTask.from_default2(config_path="config.json", eradication_path=manifest.eradication_path, campaign_builder=build_camp, demog_builder=None, schema_path=manifest.schema_file, param_custom_cb=set_param_fn, ep4_custom_cb=None)
 
-    #task.common_assets.add_asset( demog_path )
+    # task.common_assets.add_asset( demog_path )
 
-    # print("Adding asset dir...")
-    # task.common_assets.add_directory(assets_directory=manifest.assets_input_dir)
+    print("Adding asset dir...")
+    task.common_assets.add_directory(assets_directory=manifest.assets_input_dir)
 
-    task.set_sif( "dtk_centos.id" )
+    # task.set_sif( "dtk_centos.id" )
 
     # Set task.campaign to None to not send any campaign to comps since we are going to override it later with
     # dtk-pre-process.
     print("Adding local assets (py scripts mainly)...")
 
-    # if ep4_scripts is not None:
-    #     for asset in ep4_scripts:
-    #         pathed_asset = Asset(pathlib.PurePath.joinpath(manifest.ep4_path, asset), relative_path="python")
-    #         task.common_assets.add_asset(pathed_asset)
+    if ep4_scripts is not None:
+        for asset in ep4_scripts:
+            pathed_asset = Asset(pathlib.PurePath.joinpath(manifest.ep4_path, asset), relative_path="python")
+            task.common_assets.add_asset(pathed_asset)
 
     # Create simulation sweep with builder
     builder = SimulationBuilder()
-    builder.add_sweep_definition( art_coverage_test_sweep, range(control_params.nSims) )
+    # builder.add_sweep_definition( art_coverage_test_sweep, range(control_params.nSims) )
+    builder.add_sweep_definition( update_sim_random_seed, range(control_params.nSims) )
 
     # create experiment from builder
     experiment  = Experiment.from_builder(builder, task, name=control_params.exp_name) 
@@ -349,4 +380,4 @@ if __name__ == "__main__":
         import emod_hiv.bootstrap as dtk
         dtk.setup(pathlib.Path(manifest.eradication_path).parent)
 
-    general_sim()
+    general_sim(manifest.my_ep4_assets)

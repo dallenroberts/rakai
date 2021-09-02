@@ -14,14 +14,14 @@
                 {
                     "Comment": "100% Healthcare Accessible", 
                     "Initial_Distribution": [
-                        1, 
-                        0
+                        0, 
+                        1
                     ], 
                     "Property": "Accessibility", 
                     "Transitions": [], 
                     "Values": [
-                        "Yes", 
-                        "No"
+                        "Easy", 
+                        "Hard"
                     ]
                 },
                 {
@@ -130,7 +130,20 @@
                         "ViralLoad1000to9999", 
                         "ViralLoad10000toInfinity"
                     ]               
-                }
+                },
+                {
+                    "Comment": "Can test positive for HIV", 
+                    "Initial_Distribution": [
+                        1, 
+                        0
+                    ], 
+                    "Property": "TestingStatus", 
+                    "Transitions": [], 
+                    "Values": [
+                        "INELIGIBLE", 
+                        "ELIGIBLE"
+                    ]
+                } 
             ], 
             "NodeName": "Rakai"
         }
