@@ -112,7 +112,7 @@ def _distribute_psk_tracker_by_age_and_sex( camp, min_age, max_age, sex, tvmap )
     # 2) Give out a ref tracker that filters on the target IP above but distributes a Placebo/MedicalRecord with the name "PositiveStatusKnown" or something. This also sets an IP InterventionStatus:ARTEligible or something nasty. The placebo can be a delay or no-effect vaccine or something for now.
     status_known_medrec = comm.HSB( camp, Tendency=0, Name="PositiveStatusKnown" )
     status_known_medrec.New_Property_Value=ART_eligible_tag # Placeholder for "InterventionStatus:ARTEligible
-    event = reftracker.DistributeIVByRefTrack( camp, Start_Day=1, Intervention=status_known_medrec, TVMap=tvmap, Property_Restrictions="TestingStatus:ELIGIBLE", Target_Age_Min=min_age, Target_Age_Max=max_age, Target_Gender=sex )
+    event = reftracker.DistributeIVByRefTrack( camp, Start_Day=1, Intervention=status_known_medrec, TVMap=tvmap, Property_Restrictions="TestingStatus:ELIGIBLE", Target_Age_Min=min_age, Target_Age_Max=max_age, Target_Gender=sex, Update_Period=30.4166666666667  )
     camp.add( event )
 
 
@@ -143,7 +143,7 @@ def _distribute_art_by_ref_counter_by_age_and_sex( camp, art_coverage, min_age, 
     mid = comm.MultiInterventionDistributor( camp, [ new_art, delayed_dropout_iv, started_art_signal ] )
     mid["Intervention_Name"] = "ART"
     # Old way of doing ART is ARTBasic + Delay->ARTDropout
-    event = reftracker.DistributeIVByRefTrack( camp, Start_Day=1, Intervention=mid, TVMap=tvmap, Property_Restrictions=ART_eligible_tag, Target_Gender=sex, Target_Age_Min=min_age, Target_Age_Max=max_age )
+    event = reftracker.DistributeIVByRefTrack( camp, Start_Day=1, Intervention=mid, TVMap=tvmap, Property_Restrictions=ART_eligible_tag, Target_Gender=sex, Target_Age_Min=min_age, Target_Age_Max=max_age, Update_Period=30.4166666666667)
     camp.add( event )
 
     ## ART Dropout
@@ -358,6 +358,9 @@ def general_sim(ep4_scripts):
         fd.write(experiment.uid.hex)
     print()
     print(experiment.uid.hex)
+
+    from emodpy_hiv.download import download
+    download( experiment.uid.hex, manifest.output_dl_folder, manifest.output_files_to_get )
     assert experiment.succeeded
 
 
