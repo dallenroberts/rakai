@@ -42,7 +42,7 @@ def _add_sti_by_risk_and_coverage( camp, risk, coverage, include_ongoing=True ):
     """
     import emodpy_hiv.interventions.modcoinf as coinf
     set_sti_coinf = coinf.new_intervention( camp )
-    set_sti_coinf["Intervention_Name"] = "Pick_Up_A_Nasty"
+    set_sti_coinf["Intervention_Name"] = "STI_CoInfection"
     signal = hiv_utils.broadcast_event_immediate( camp, "CaughtNonHIVSTI" )
 
     event = comm.ScheduledCampaignEvent( camp, Start_Day=1, Event_Name="STI Co-Infection Setup", Intervention_List=[set_sti_coinf,signal], Property_Restrictions=risk, Demographic_Coverage=coverage )
@@ -69,8 +69,8 @@ def add_sti_coinfection_complex( camp, low_coverage=0.1, med_coverage=0.3, high_
 
 def add_csw( camp ):
     # STIDebut -(HIVDelay)-> Uptake -(PVC)-> Dropout (PVC)
-    male_delayed_uptake = hiv_utils.broadcast_event_delayed( camp, "CSW_Uptake", delay={ "Delay_Period": ck.CSW_Male_Uptake_Delay } )
-    female_delayed_uptake = hiv_utils.broadcast_event_delayed( camp, "CSW_Uptake", delay={ "Delay_Period": ck.CSW_Male_Uptake_Delay } )
+    male_delayed_uptake = hiv_utils.broadcast_event_delayed( camp, "CSW_Uptake", delay={"Delay_Distribution": ck.CSW_Male_Uptake_Delay_Distribution, "Delay_Period_Min": ck.CSW_Male_Uptake_Delay_Period_Min, "Delay_Period_Max": ck.CSW_Male_Uptake_Delay_Period_Max } )
+    female_delayed_uptake = hiv_utils.broadcast_event_delayed( camp, "CSW_Uptake", delay={"Delay_Distribution": ck.CSW_Female_Uptake_Delay_Distribution, "Delay_Period_Shape": ck.CSW_Female_Uptake_Delay_Period_Min, "Delay_Period_Scale": ck.CSW_Female_Uptake_Delay_Period_Max } )
 
     # 1: STIDebut->Uptake delay (males)
     add_triggered_event( camp, in_trigger="STIDebut", out_iv=male_delayed_uptake, event_name="Male CSW Debut->Uptake", coverage=ck.CSW_Male_Uptake_Coverage, target_sex="Male" )
@@ -79,13 +79,13 @@ def add_csw( camp ):
     add_triggered_event( camp, in_trigger="STIDebut", out_iv=female_delayed_uptake, event_name="Female CSW Debut->Uptake", coverage=ck.CSW_Female_Uptake_Coverage, target_sex="Female" )
 
     # 4: Uptake->Dropout delay (males)
-    male_delayed_dropout = hiv_utils.broadcast_event_delayed( camp, "CSW_Dropout", delay={ "Delay_Period": ck.CSW_Male_Dropout_Delay } )
-    female_delayed_dropout = hiv_utils.broadcast_event_delayed( camp, "CSW_Dropout", delay={ "Delay_Period": ck.CSW_Female_Dropout_Delay } )
+    male_delayed_dropout = hiv_utils.broadcast_event_delayed( camp, "CSW_Dropout", delay={ "Delay_Distribution": ck.CSW_Male_Dropout_Delay_Distribution, "Delay_Period_Min": ck.CSW_Male_Dropout_Delay_Period_Min, "Delay_Period_Max": ck.CSW_Male_Dropout_Delay_Period_Max } )
+    female_delayed_dropout = hiv_utils.broadcast_event_delayed( camp, "CSW_Dropout", delay={ "Delay_Distribution": ck.CSW_Female_Dropout_Delay_Distribution, "Delay_Period_Shape": ck.CSW_Female_Dropout_Delay_Period_Shape, "Delay_Period_Scale": ck.CSW_Female_Dropout_Delay_Period_Scale } )
 
-    add_triggered_event( camp, in_trigger="CSW_Uptake", out_iv=male_delayed_dropout, event_name="Male CSW Uptake->Dropout", coverage=ck.CSW_Male_Dropout_Coverage, target_sex="Male" )
+    add_triggered_event( camp, in_trigger="CSW_Uptake", out_iv=male_delayed_dropout, event_name="Male CSW Uptake->Dropout", target_sex="Male" )
 
     # 5: Uptake->Dropout delay (females)
-    add_triggered_event( camp, in_trigger="CSW_Uptake", out_iv=female_delayed_dropout, event_name="Female CSW Uptake->Dropout", coverage=ck.CSW_Female_Dropout_Coverage, target_sex="Female" )
+    add_triggered_event( camp, in_trigger="CSW_Uptake", out_iv=female_delayed_dropout, event_name="Female CSW Uptake->Dropout", target_sex="Female" )
      
     # 3: Actually do the CSW Uptake (via PropertyValueChanger)
     pvc_go_high = comm.PropertyValueChanger( camp, Target_Property_Key="Risk", Target_Property_Value="HIGH", New_Property_Value="" )
@@ -234,7 +234,7 @@ def set_param_fn( config ):
 def timestep_from_year( year ):
     return (year-control_params.Base_Year)*365
 
-def build_camp( art_coverage = 0 ):
+def build_camp( art_coverage = 0.9 ):
     """
         Build a campaign input file for the DTK using emod_api type functions or helpers from this module. 
         Note that 'camp' is short for 'campaign'.
@@ -246,7 +246,7 @@ def build_camp( art_coverage = 0 ):
     camp.set_schema( manifest.schema_file )
 
     # Seed infections
-    event = ob.seed_infections(camp, start_day = timestep_from_year(control_params.Base_Year + 1), coverage = 0.075, target_properties = "Risk:MEDIUM")
+    event = ob.seed_infections(camp, start_day = timestep_from_year(1975), coverage = 0.075, target_properties = "Risk:HIGH")
     # event = ob.new_intervention(camp = camp, timestep = timestep_from_year(2004), coverage = 0.5)
     camp.add( event )
 

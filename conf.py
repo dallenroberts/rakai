@@ -5,9 +5,7 @@ def config_reports( conf ):
       "DelayUntilBooster1",
       "ReceivedBooster",
       "Vaccinated",
-      "ReceivedPrEP"
-    ]
-    conf.parameters.Report_Event_Recorder_Events = [
+      "ReceivedPrEP",
       "NewInfectionEvent",
       "HIVSymptomatic",
       "STIDebut",
@@ -18,6 +16,8 @@ def config_reports( conf ):
       "ART_Dropout",
       "Circumcised"
     ]
+    # conf.parameters.Report_Event_Recorder_Events = [
+    #]
     conf.parameters.Report_HIV_ART = 1
     #conf.parameters.Report_HIV_ART_Start_Year = 2004
     #conf.parameters.Report_HIV_ART_Stop_Year = 10000
@@ -43,7 +43,7 @@ def config_reports( conf ):
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Circumcision_Data = 1
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Gender_Data = 1
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_HIV_Data = 1
-    conf.parameters.Report_HIV_ByAgeAndGender_Collect_IP_Data = ["Accessibility", "TestingStatus"]
+    conf.parameters.Report_HIV_ByAgeAndGender_Collect_IP_Data = ["Risk"]
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_Intervention_Data = []
     conf.parameters.Report_HIV_ByAgeAndGender_Collect_On_Art_Data = 0
     rhbaagecl_events_for_later = [
@@ -58,11 +58,11 @@ def config_reports( conf ):
     conf.parameters.Report_HIV_Infection = 0
     conf.parameters.Report_HIV_Mortality = 0
     conf.parameters.Report_HIV_Period = 365
-    conf.parameters.Report_Relationship_Start = 1
-    conf.parameters.Report_Transmission = 1
+    conf.parameters.Report_Relationship_Start = 0
+    conf.parameters.Report_Transmission = 0
     conf.parameters.Report_HIV_Infection_Start_Year = 1980
     conf.parameters.Report_HIV_Infection_Stop_Year = 2050
-    conf.parameters.Enable_Property_Output = 1
+    conf.parameters.Enable_Property_Output = 0
    
 def config_non_schema_params( conf ):
     conf.parameters["Enable_Continuous_Log_Flushing"] = 0
@@ -124,6 +124,7 @@ def set_config ( conf ):
     conf.parameters.Death_Rate_Dependence = "NONDISEASE_MORTALITY_BY_YEAR_AND_AGE_FOR_EACH_GENDER"
     conf.parameters.Mortality_Time_Course = "DAILY_MORTALITY"
     conf.parameters.x_Other_Mortality = 1
+    conf.parameters.Birth_Rate_Dependence = "INDIVIDUAL_PREGNANCIES_BY_AGE_AND_YEAR"
 
     config_non_schema_params( conf )
     config_reports( conf )
